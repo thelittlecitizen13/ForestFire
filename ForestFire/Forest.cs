@@ -53,7 +53,19 @@ namespace ForestFire
                 for (int y = 0; y < TreeMatriza.GetLength(1); y++)
                 {
                     TreeMatriza[x, y].NearTrees = getNearTrees(x, y);
+                    TreeMatriza[x, y].UpdateNearTrees();
                 }
+            }
+        }
+        public void PrintForest()
+        {
+            for (int x = 0; x < TreeMatriza.GetLength(0); x++)
+            {
+                for (int y = 0; y < TreeMatriza.GetLength(1); y++)
+                {
+                    System.Console.Write(TreeMatriza[x,y].Status);
+                }
+                System.Console.WriteLine();
             }
         }
     }
