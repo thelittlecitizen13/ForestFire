@@ -1,13 +1,32 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace ForestFire
 {
+    public delegate void BurnTree(Forest forest);
+    public delegate void ChangeTreeStatus();
     public class Forest
     {
         public Tree[,] TreeMatriza { get; set; }
+        private event ChangeTreeStatus _doneBurning;
+        public event BurnTree BurnTrees;
         public Forest(Tree[,] trees)
         {
             TreeMatriza = trees;
+            FillForest();
+        }
+        public void Run(int times, int xCoordinate, int yCoordinate)
+        {
+            TreeMatriza[xCoordinate, yCoordinate].Burn(this);
+            PrintForest();
+            for (int i = 0; i < times; i++)
+            {
+                BurnTrees?.Invoke(this);
+                PrintForest();
+                _doneBurning?.Invoke();
+                Thread.Sleep(2500);
+            }
         }
         public void FillForest()
         {
@@ -17,6 +36,7 @@ namespace ForestFire
                 for (int y = 0; y < TreeMatriza.GetLength(1); y++)
                 {
                     TreeMatriza[x, y] = factory.CreateTree();
+                    _doneBurning += TreeMatriza[x, y].DoneBurningRound;
                 }
             }
             updateNearTrees();
@@ -26,21 +46,19 @@ namespace ForestFire
             List<Tree> nearTrees = new List<Tree>();
             for (int x = xCoordinate-1; x<=xCoordinate+1; x++)
             {
-
+                Random rand = new Random();
                 for (int y = yCoordinate - 1; y <= yCoordinate + 1; y++)
                 {
-                    if (x != xCoordinate && y != yCoordinate)
+                    try
                     {
-                        try
-                        {
-                            Tree t1 = TreeMatriza[x, y];
-                            if (t1 != null)
-                                nearTrees.Add(t1);
-                        }
-                        catch
-                        {
+                        Tree t1 = TreeMatriza[x, y];
+                        int chance = rand.Next(0, 100);
+                        if (t1 != null && chance <= 70)
+                            nearTrees.Add(t1);
+                    }
+                    catch
+                    {
 
-                        }
                     }
                 }
             }
@@ -52,8 +70,7 @@ namespace ForestFire
             {
                 for (int y = 0; y < TreeMatriza.GetLength(1); y++)
                 {
-                    TreeMatriza[x, y].NearTrees = getNearTrees(x, y);
-                    TreeMatriza[x, y].UpdateNearTrees();
+                    TreeMatriza[x, y].UpdateNearTrees(getNearTrees(x, y), this);
                 }
             }
         }
@@ -63,10 +80,13 @@ namespace ForestFire
             {
                 for (int y = 0; y < TreeMatriza.GetLength(1); y++)
                 {
-                    System.Console.Write(TreeMatriza[x,y].Status);
+                    System.Console.Write(TreeMatriza[x,y].Status + " ");
                 }
                 System.Console.WriteLine();
             }
+            System.Console.WriteLine();
+            System.Console.WriteLine();
+            System.Console.WriteLine();
         }
     }
 }

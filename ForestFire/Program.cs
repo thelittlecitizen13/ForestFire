@@ -7,7 +7,10 @@ namespace ForestFire
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Tree[,] trees = new Tree[20, 20];
+            Forest forest = new Forest(trees);
+            forest.PrintForest();
+            forest.Run(50, 10, 10);
         }
     }
 }
